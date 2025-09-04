@@ -18,7 +18,7 @@ blueprint:
           filter:
             domain: zone
     notify_device:
-      name: Device to notify
+      name: Gerät zur Benachrichtigung
       description: Gerät muss die offizielle Home Assistant App ausführen, um Benachrichtigungen zu empfangen.
       selector:
         device:
