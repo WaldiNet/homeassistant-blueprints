@@ -1,9 +1,10 @@
 blueprint:
-  name: Verlassen einer Zone
-  description: Sende eine Benachrichtigung an ein Gerät, wenn eine Person eine bestimmte Zone verlässt.
+  name: Verlassen mehrerer Zonen
+  description: Sende eine Benachrichtigung an ein Gerät, wenn eine Person eine oder mehrere Zonen verlässt.
   domain: automation
+  author: Home Assistant (angepasst von Eric Falsett)
   source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_leaving_zone_de.yaml
-  author: Home Assistant
+
   input:
     person_entity:
       name: Person
@@ -11,10 +12,11 @@ blueprint:
         entity:
           filter:
             domain: person
-    zone_entity:
-      name: Zone
+    zone_entities:
+      name: Zonen
       selector:
         entity:
+          multiple: true
           filter:
             domain: zone
     notify_device:
@@ -26,26 +28,40 @@ blueprint:
             integration: mobile_app
 
 triggers:
-  trigger: state
-  entity_id: !input person_entity
+  - trigger: state
+    entity_id: !input person_entity
 
 variables:
-  zone_entity: !input zone_entity
-  # This is the state of the person when it's in this zone.
-  zone_state: "{{ states[zone_entity].name }}"
+  zone_entities: !input zone_entities
   person_entity: !input person_entity
   person_name: "{{ states[person_entity].name }}"
 
 conditions:
-  condition: template
-  # The first case handles leaving the Home zone which has a special state when zoning called 'home'.
-  # The second case handles leaving all other zones.
-  value_template: "{{ zone_entity == 'zone.home' and trigger.from_state.state == 'home' and trigger.to_state.state != 'home' or trigger.from_state.state == zone_state and trigger.to_state.state != zone_state }}"
+  - condition: template
+    value_template: >-
+      {% set to_state = trigger.to_state.state %}
+      {% set from_state = trigger.from_state.state %}
+      {% for zone in zone_entities %}
+        {% set zone_name = states[zone].name %}
+        {% if (zone == 'zone.home' and from_state == 'home' and to_state != 'home') %}
+          {{ true }}
+        {% elif (from_state == zone_name and to_state != zone_name) %}
+          {{ true }}
+        {% endif %}
+      {% endfor %}
+      {{ false }}
 
 actions:
-  - alias: "Benachrichtigen, dass eine Person die Zone betreten hat"
+  - alias: "Benachrichtigen, dass eine Person eine Zone verlassen hat"
     domain: mobile_app
     type: notify
     device_id: !input notify_device
-    message: '{{ person_name }} hat "{{ zone_state }}" verlassen.'
+    message: >-
+      {% set from_state = trigger.from_state.state %}
+      {% for zone in zone_entities %}
+        {% set zone_name = states[zone].name %}
+        {% if (zone == 'zone.home' and from_state == 'home') or (from_state == zone_name) %}
+          {{ person_name }} hat "{{ zone_name }}" verlassen.
+        {% endif %}
+      {% endfor %}
     title: Tracking
