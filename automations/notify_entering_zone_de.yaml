@@ -28,7 +28,7 @@ blueprint:
             integration: mobile_app
 
 triggers:
-  - platform: state
+  - trigger: state
     entity_id: !input person_entity
 
 variables:
@@ -41,21 +41,23 @@ conditions:
     value_template: >-
       {% set to_state = trigger.to_state.state %}
       {% set from_state = trigger.from_state.state %}
+      {% set hit = false %}
       {% for zone in zone_entities %}
         {% set zone_name = states[zone].name %}
         {% if (zone == 'zone.home' and from_state != 'home' and to_state == 'home') %}
-          {{ true }}
+          {% set hit = true %}
         {% elif (from_state != zone_name and to_state == zone_name) %}
-          {{ true }}
+          {% set hit = true %}
         {% endif %}
       {% endfor %}
-      {{ false }}
+      {{ hit }}
 
 actions:
   - alias: "Benachrichtigen, dass eine Person eine Zone betreten hat"
     domain: mobile_app
     type: notify
     device_id: !input notify_device
+    title: Tracking
     message: >-
       {% set to_state = trigger.to_state.state %}
       {% for zone in zone_entities %}
@@ -64,4 +66,3 @@ actions:
           {{ person_name }} ist in "{{ zone_name }}" angekommen.
         {% endif %}
       {% endfor %}
-    title: Tracking

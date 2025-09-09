@@ -2,8 +2,7 @@ blueprint:
   name: Verlassen mehrerer Zonen
   description: Sende eine Benachrichtigung an ein Gerät, wenn eine Person eine oder mehrere Zonen verlässt.
   domain: automation
-  author: Home Assistant (angepasst von Eric Falsett)
-  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_leaving_zone_de.yaml
+  author: Eric Falsett
 
   input:
     person_entity:
@@ -41,21 +40,23 @@ conditions:
     value_template: >-
       {% set to_state = trigger.to_state.state %}
       {% set from_state = trigger.from_state.state %}
+      {% set hit = false %}
       {% for zone in zone_entities %}
         {% set zone_name = states[zone].name %}
         {% if (zone == 'zone.home' and from_state == 'home' and to_state != 'home') %}
-          {{ true }}
+          {% set hit = true %}
         {% elif (from_state == zone_name and to_state != zone_name) %}
-          {{ true }}
+          {% set hit = true %}
         {% endif %}
       {% endfor %}
-      {{ false }}
+      {{ hit }}
 
 actions:
   - alias: "Benachrichtigen, dass eine Person eine Zone verlassen hat"
     domain: mobile_app
     type: notify
     device_id: !input notify_device
+    title: Tracking
     message: >-
       {% set from_state = trigger.from_state.state %}
       {% for zone in zone_entities %}
@@ -64,4 +65,3 @@ actions:
           {{ person_name }} hat "{{ zone_name }}" verlassen.
         {% endif %}
       {% endfor %}
-    title: Tracking
