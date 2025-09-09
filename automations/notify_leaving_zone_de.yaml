@@ -53,17 +53,16 @@ conditions:
 
 actions:
   - alias: "Benachrichtigen, dass eine Person eine Zone verlassen hat"
-    domain: notify
-    type: notify
+    service: notify
     target:
       device_id: !input notify_devices
-    title: Tracking
-    message: >-
-      {% set from_state = trigger.from_state.state %}
-      {% for zone in zone_entities %}
-        {% set zone_name = states[zone].name %}
-        {% if (zone == 'zone.home' and from_state == 'home') or (from_state == zone_name) %}
-          {{ person_name }} hat "{{ zone_name }}" verlassen.
-        {% endif %}
-      {% endfor %}
-
+    data:
+      title: Tracking
+      message: >-
+        {% set from_state = trigger.from_state.state %}
+        {% for zone in zone_entities %}
+          {% set zone_name = states[zone].name %}
+          {% if (zone == 'zone.home' and from_state == 'home') or (from_state == zone_name) %}
+            {{ person_name }} hat "{{ zone_name }}" verlassen.
+          {% endif %}
+        {% endfor %}
