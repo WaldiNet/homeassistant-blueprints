@@ -2,8 +2,7 @@ blueprint:
   name: Betreten mehrerer Zonen
   description: Sende eine Benachrichtigung an ein Gerät, wenn eine Person eine oder mehrere Zonen betritt.
   domain: automation
-  author: Home Assistant (angepasst von Eric Falsett)
-  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_entering_zone_de.yaml
+  author: Eric Falsett
 
   input:
     person_entity:
