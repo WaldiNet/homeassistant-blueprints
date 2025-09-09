@@ -53,9 +53,7 @@ conditions:
 
 actions:
   - alias: "Benachrichtigen, dass eine Person eine Zone verlassen hat"
-    service: notify
-    target:
-      device_id: !input notify_devices
+    service: notify.mobile_app
     data:
       title: Tracking
       message: >-
@@ -66,3 +64,6 @@ actions:
             {{ person_name }} hat "{{ zone_name }}" verlassen.
           {% endif %}
         {% endfor %}
+    target:
+      device_id: !input notify_devices
+
