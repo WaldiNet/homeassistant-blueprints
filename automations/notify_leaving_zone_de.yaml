@@ -3,7 +3,6 @@ blueprint:
   description: Sende eine Benachrichtigung an mehrere Geräte, wenn eine oder mehrere Personen eine oder mehrere Zonen verlassen.
   domain: automation
   author: Home Assistant (angepasst von Eric Falsett)
-  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_leaving_zone_de.yaml
 
   input:
     person_entities:
@@ -54,16 +53,19 @@ conditions:
 
 actions:
   - alias: "Benachrichtigen, dass eine Person eine Zone verlassen hat"
-    service: mobile_app.notify
-    target:
-      device_id: !input notify_devices
-    data:
-      title: Tracking
-      message: >-
-        {% set from_state = trigger.from_state.state %}
-        {% for zone in zone_entities %}
-          {% set zone_name = states[zone].name %}
-          {% if (zone == 'zone.home' and from_state == 'home') or (from_state == zone_name) %}
-            {{ person_name }} hat "{{ zone_name }}" verlassen.
-          {% endif %}
-        {% endfor %}
+    repeat:
+      for_each: !input notify_devices
+      sequence:
+        - domain: mobile_app
+          type: notify
+          device_id: "{{ repeat.item }}"
+          title: Tracking
+          message: >-
+            {% set from_state = trigger.from_state.state %}
+            {% for zone in zone_entities %}
+              {% set zone_name = states[zone].name %}
+              {% if (zone == 'zone.home' and from_state == 'home') or (from_state == zone_name) %}
+                {{ person_name }} hat "{{ zone_name }}" verlassen.
+              {% endif %}
+            {% endfor %}
+
