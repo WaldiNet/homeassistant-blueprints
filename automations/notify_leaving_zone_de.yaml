@@ -56,7 +56,7 @@ actions:
     domain: mobile_app
     type: notify
     device_id: !input notify_device
-    title: Tracking
+    title: Standort
     message: >-
       {% set from_state = trigger.from_state.state %}
       {% for zone in zone_entities %}

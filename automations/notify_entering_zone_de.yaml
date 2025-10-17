@@ -64,4 +64,4 @@ actions:
           {{ person_name }} ist in "{{ zone_name }}" angekommen.
         {% endif %}
       {% endfor %}
-    title: Tracking
+    title: Standort

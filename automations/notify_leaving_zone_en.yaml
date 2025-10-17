@@ -48,4 +48,4 @@ actions:
     type: notify
     device_id: !input notify_device
     message: '{{ person_name }} has left "{{ zone_state }}"'
-    title: Tracking
+    title: Location
