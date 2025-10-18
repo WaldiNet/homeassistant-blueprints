@@ -2,8 +2,8 @@ blueprint:
   name: Zone Notification
   description: Send a notification to a device when a person leaves a specific zone.
   domain: automation
-  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_leaving_zone_en.yaml
   author: Home Assistant
+  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_leaving_zone_en.yaml
   input:
     person_entity:
       name: Person

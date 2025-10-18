@@ -2,8 +2,8 @@ blueprint:
   name: Zone Enter Notification
   description: Send a notification to a device when a person enters a specific zone.
   domain: automation
-  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_entering_zone_en.yaml
   author: Eric Falsett
+  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/notify_entering_zone_en.yaml
   input:
     person_entity:
       name: Person
