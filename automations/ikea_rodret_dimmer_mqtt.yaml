@@ -1,0 +1,124 @@
+blueprint:
+  name: "Ikea RODRET Dimmer (Z2M Native MQTT)"
+  description: "Control a light with an Ikea RODRET dimmer using native MQTT commands for smooth dimming."
+  domain: automation
+  input:
+    remote_device:
+      name: Ikea RODRET Dimmer
+      description: "Select the Ikea RODRET dimmer (must be via Zigbee2MQTT)."
+      selector:
+        device:
+          integration: mqtt
+          manufacturer: IKEA
+    target_light:
+      name: Target Light
+      description: "The light entity to toggle on/off."
+      selector:
+        entity:
+          domain: light
+    mqtt_topic:
+      name: Zigbee2MQTT Topic
+      description: "The base topic for the light (e.g., 'zigbee2mqtt/ceiling-lights'). Do NOT include '/set'."
+      selector:
+        text:
+    dim_speed:
+      name: Dimming Speed
+      description: "How fast the light dims (default: 80)."
+      default: 80
+      selector:
+        number:
+          min: 10
+          max: 200
+          mode: slider
+
+mode: restart
+
+# --- THE FIX: We map inputs to variables here so Jinja templates can use them ---
+variables:
+  dim_speed_var: !input dim_speed
+  mqtt_topic_var: !input mqtt_topic
+
+trigger:
+  - domain: mqtt
+    device_id: !input remote_device
+    type: action
+    subtype: "on"
+    trigger: device
+    id: "on"
+  - domain: mqtt
+    device_id: !input remote_device
+    type: action
+    subtype: "off"
+    trigger: device
+    id: "off"
+  - domain: mqtt
+    device_id: !input remote_device
+    type: action
+    subtype: brightness_move_up
+    trigger: device
+    id: brightness_move_up
+  - domain: mqtt
+    device_id: !input remote_device
+    type: action
+    subtype: brightness_move_down
+    trigger: device
+    id: brightness_move_down
+  - domain: mqtt
+    device_id: !input remote_device
+    type: action
+    subtype: brightness_stop
+    trigger: device
+    id: brightness_stop
+
+action:
+  - choose:
+      # 1. Button Press: ON
+      - conditions:
+          - condition: trigger
+            id: "on"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: !input target_light
+      
+      # 2. Button Press: OFF
+      - conditions:
+          - condition: trigger
+            id: "off"
+        sequence:
+          - action: light.turn_off
+            target:
+              entity_id: !input target_light
+
+      # 3. Hold Up: Send "Start Moving Up" command
+      - conditions:
+          - condition: trigger
+            id: brightness_move_up
+        sequence:
+          - action: mqtt.publish
+            data:
+              topic: "{{ mqtt_topic_var }}/set"
+              payload: '{"brightness_move": {{ dim_speed_var }} }'
+              qos: 0
+
+      # 4. Hold Down: Send "Start Moving Down" command
+      - conditions:
+          - condition: trigger
+            id: brightness_move_down
+        sequence:
+          - action: mqtt.publish
+            data:
+              topic: "{{ mqtt_topic_var }}/set"
+              payload: '{"brightness_move": -{{ dim_speed_var }} }'
+              qos: 0
+
+      # 5. Release: Send "Stop Moving" command
+      - conditions:
+          - condition: trigger
+            id: brightness_stop
+        sequence:
+          - action: mqtt.publish
+            data:
+              topic: "{{ mqtt_topic_var }}/set"
+              payload: '{"brightness_move": 0}'
+              qos: 0
