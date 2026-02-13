@@ -1,5 +1,5 @@
 blueprint:
-  name: Zone Notification
+  name: Zone Leaving Notification
   description: Send a notification to a device when a person leaves a specific zone.
   domain: automation
   author: Home Assistant

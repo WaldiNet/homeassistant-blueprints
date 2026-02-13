@@ -2,6 +2,8 @@ blueprint:
   name: "Ikea RODRET Dimmer (Z2M Native MQTT)"
   description: "Control a light with an Ikea RODRET dimmer using native MQTT commands for smooth dimming."
   domain: automation
+  author: Eric Falsett
+  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/ikea_rodret_dimmer_mqtt.yaml
   input:
     remote_device:
       name: Ikea RODRET Dimmer
@@ -33,7 +35,6 @@ blueprint:
 
 mode: restart
 
-# --- THE FIX: We map inputs to variables here so Jinja templates can use them ---
 variables:
   dim_speed_var: !input dim_speed
   mqtt_topic_var: !input mqtt_topic
