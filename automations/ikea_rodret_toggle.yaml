@@ -1,0 +1,51 @@
+blueprint:
+  name: "Ikea RODRET Switch On/Off (Z2M MQTT)"
+  description: "Control any switch, plug, or light with an Ikea RODRET remote. Handles basic on/off actions."
+  domain: automation
+  author: Eric Falsett
+  source_url: https://github.com/WaldiNet/homeassistant-blueprints/blob/main/automations/ikea_rodret_dimmer_mqtt.yaml
+  input:
+    remote_device:
+      name: Ikea RODRET Remote
+      description: "Select the Ikea RODRET remote (must be via Zigbee2MQTT)."
+      selector:
+        device:
+          integration: mqtt
+          manufacturer: IKEA
+    target_device:
+      name: Target Device
+      description: "The switch, plug, or light to turn on/off."
+      selector:
+        target: {}
+
+mode: restart
+
+trigger:
+  - domain: mqtt
+    device_id: !input remote_device
+    type: action
+    subtype: "on"
+    trigger: device
+    id: "on"
+  - domain: mqtt
+    device_id: !input remote_device
+    type: action
+    subtype: "off"
+    trigger: device
+    id: "off"
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: "on"
+        sequence:
+          - action: homeassistant.turn_on
+            target: !input target_device
+      
+      - conditions:
+          - condition: trigger
+            id: "off"
+        sequence:
+          - action: homeassistant.turn_off
+            target: !input target_device
